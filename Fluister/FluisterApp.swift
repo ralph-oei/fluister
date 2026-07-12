@@ -9,6 +9,7 @@ import AppKit
 enum FluisterWindow {
     static let onboarding = "onboarding"
     static let about = "about"
+    static let settings = "settings"
 }
 
 @main
@@ -31,13 +32,19 @@ struct FluisterApp: App {
         }
         .menuBarExtraStyle(.menu)
 
-        Settings {
+        // Bewust een gewone Window-scene i.p.v. de standaard Settings-scene: voor
+        // een menu-bar-app (accessory) haalt de Settings-scene de app niet naar
+        // voren, waardoor het venster achter andere apps verdween of stil niet
+        // opende. Nu via hetzelfde bewezen pad als het over-venster (NSApp.activate
+        // + openWindow) in MenuBarView.
+        Window("Instellingen", id: FluisterWindow.settings) {
             SettingsView(
                 settings: app.settings,
                 launchAtLogin: app.launchAtLogin,
                 onHotkeyChange: { app.applyHotkey($0) }
             )
         }
+        .windowResizability(.contentSize)
 
         Window("Welkom bij Fluister", id: FluisterWindow.onboarding) {
             OnboardingView(permissions: app.permissions, settings: app.settings)

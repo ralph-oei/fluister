@@ -40,8 +40,11 @@ struct MenuBarView: View {
 
         Divider()
 
-        SettingsLink {
-            Text("Instellingen…")
+        // Zelfde pad als het over-venster: eerst de app naar voren halen, dán het
+        // venster openen. Menu-bar-apps komen anders niet vanzelf naar de voorgrond.
+        Button("Instellingen…") {
+            NSApp.activate(ignoringOtherApps: true)
+            openWindow(id: FluisterWindow.settings)
         }
         .keyboardShortcut(",")
 

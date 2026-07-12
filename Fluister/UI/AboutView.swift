@@ -21,6 +21,7 @@ struct AboutView: View {
 
             Text("Lokaal dicteren voor macOS. Je stem en tekst verlaten je Mac niet.")
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .foregroundStyle(.secondary)
 
             Divider()
