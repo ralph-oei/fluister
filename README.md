@@ -6,10 +6,7 @@
 [![CodeQL](https://github.com/ralph-oei/fluister/actions/workflows/codeql.yml/badge.svg)](https://github.com/ralph-oei/fluister/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<!-- DEMO: voeg docs/media/demo.gif toe (⌥Space → praten → tekst op de cursor) en haal onderstaande comment-tags weg.
 ![Fluister in actie](docs/media/demo.gif)
--->
-
 
 Houd de sneltoets ingedrukt, spreek een zin, laat los. Binnen een seconde staat de
 tekst waar je cursor stond, in welke app dan ook. Chatvenster, mail, Obsidian, een
