@@ -1,0 +1,10 @@
+# SwiftPM-dependencies (WhisperKit, KeyboardShortcuts) staan in project.yml en
+# worden handmatig bijgewerkt — Dependabot's swift-ecosystem vereist een
+# Package.swift, die dit XcodeGen-project niet heeft. Dependabot houdt hier de
+# GitHub Actions-versies actueel.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

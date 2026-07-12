@@ -1,0 +1,37 @@
+# macOS
+.DS_Store
+
+# Interne werknotities — niet publiceren.
+STATUS.md
+
+# Xcode / build-artefacten
+build/
+DerivedData/
+.spm-cache/
+dist/
+*.xcuserstate
+xcuserdata/
+
+# Door XcodeGen gegenereerd — herbouw met `xcodegen generate`.
+# We negeren de projectinhoud, maar houden Package.resolved bij zodat de
+# dependency-versies gepind en scanbaar zijn (dependency graph / CodeQL).
+# Let op: elk niveau moet los worden her-ingesloten (git daalt niet af in een
+# volledig genegeerde map), vandaar het `/*`-per-niveau-patroon.
+Fluister.xcodeproj/*
+!Fluister.xcodeproj/project.xcworkspace/
+Fluister.xcodeproj/project.xcworkspace/*
+!Fluister.xcodeproj/project.xcworkspace/xcshareddata/
+Fluister.xcodeproj/project.xcworkspace/xcshareddata/*
+!Fluister.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+Fluister.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!Fluister.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# Signing / secrets — mag NOOIT gecommit worden.
+*.p12
+*.cer
+*.certSigningRequest
+*.provisionprofile
+*.mobileprovision
+
+# Modellen / grote binaries (lokaal gecachet, niet in de repo)
+*.mlmodelc

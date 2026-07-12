@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Fluister</string>
+    <key>CFBundleDisplayName</key>
+    <string>Fluister</string>
+    <key>CFBundleIdentifier</key>
+    <string>ai.ralphoei.fluister</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+
+    <!-- Menu-bar only: geen dock-icoon (U1, R5) -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <!-- Microfoon-permissie prompt (U4, R2/R6) -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Fluister gebruikt je microfoon om je gesproken tekst lokaal te transcriberen. Er wordt niets naar de cloud gestuurd.</string>
+</dict>
+</plist>

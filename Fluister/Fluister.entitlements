@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+      KTD3: App Sandbox bewust UIT. System-wide tekst-insertie in andere apps
+      (CGEvent posten / Accessibility) kan niet vanuit de sandbox. Gevolg:
+      distributie via Developer ID / ad-hoc signing, niet via de Mac App Store.
+      We zetten de sandbox-sleutel expliciet op false zodat de intentie zichtbaar is.
+    -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+
+    <!-- Microfoon (U4). Bij een niet-gesandboxte app volstaat feitelijk
+         NSMicrophoneUsageDescription, maar we houden 't expliciet. -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+
+    <!-- Toegankelijkheid (tekst-insertie, U6) is GEEN entitlement maar een
+         TCC-permissie die de gebruiker in Systeeminstellingen toekent.
+         Zie PermissionsManager (U2). -->
+</dict>
+</plist>

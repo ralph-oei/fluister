@@ -1,0 +1,73 @@
+# XcodeGen-projectdefinitie → genereert Fluister.xcodeproj.
+# Herbouwen: `xcodegen generate` in deze map.
+name: Fluister
+options:
+  bundleIdPrefix: ai.ralphoei
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit.git
+    from: "0.9.0"
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts.git
+    from: "2.0.0"
+
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+
+targets:
+  Fluister:
+    type: application
+    platform: macOS
+    sources:
+      - path: Fluister
+        excludes:
+          - "Info.plist"
+          - "Fluister.entitlements"
+    dependencies:
+      - package: WhisperKit
+        product: WhisperKit
+      - package: KeyboardShortcuts
+        product: KeyboardShortcuts
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.ralphoei.fluister
+        INFOPLIST_FILE: Fluister/Info.plist
+        GENERATE_INFOPLIST_FILE: "NO"
+        CODE_SIGN_ENTITLEMENTS: Fluister/Fluister.entitlements
+        # Lokale build: ad-hoc signing, geen team nodig.
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_HARDENED_RUNTIME: "YES"
+        # Nodig voor @testable import Fluister vanuit FluisterTests.
+        ENABLE_TESTABILITY: "YES"
+
+  FluisterTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: FluisterTests
+    dependencies:
+      - target: Fluister
+      - package: KeyboardShortcuts
+        product: KeyboardShortcuts
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.ralphoei.fluister.tests
+        GENERATE_INFOPLIST_FILE: "YES"
+
+schemes:
+  Fluister:
+    build:
+      targets:
+        Fluister: all
+        FluisterTests: [test]
+    test:
+      targets:
+        - FluisterTests
