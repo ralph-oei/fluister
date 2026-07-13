@@ -6,14 +6,17 @@ final class FakeTranscriber: SpeechTranscribing, @unchecked Sendable {
     var prepareError: Error?
     var transcribeError: Error?
     var result: String
+    /// Optionele download-fracties die prepare() doorgeeft aan de progress-callback.
+    var progressSteps: [Double] = []
     private(set) var prepareCount = 0
 
     init(result: String = "hallo wereld") {
         self.result = result
     }
 
-    func prepare() async throws {
+    func prepare(onDownloadProgress: @escaping @Sendable (Double) -> Void) async throws {
         prepareCount += 1
+        for step in progressSteps { onDownloadProgress(step) }
         if let prepareError { throw prepareError }
     }
 
@@ -61,6 +64,19 @@ final class ModelManagerTests: XCTestCase {
         let m = ModelManager(makeTranscriber: { _ in fake })
 
         XCTAssertEqual(m.state, .notLoaded)
+        await m.load()
+
+        XCTAssertEqual(m.state, .ready)
+        XCTAssertNotNil(m.transcriber)
+        XCTAssertEqual(fake.prepareCount, 1)
+    }
+
+    @MainActor
+    func testLoadWithDownloadProgressEndsReady() async {
+        let fake = FakeTranscriber()
+        fake.progressSteps = [0.25, 0.5, 1.0]   // download tot 100%, dan compileren
+        let m = ModelManager(makeTranscriber: { _ in fake })
+
         await m.load()
 
         XCTAssertEqual(m.state, .ready)

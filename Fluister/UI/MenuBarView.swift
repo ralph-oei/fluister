@@ -68,9 +68,13 @@ struct MenuBarView: View {
     private var dictationHint: String {
         switch controller.phase {
         case .idle:
-            return model.state == .ready
-                ? "Houd ⌥Space ingedrukt en spreek"
-                : "Model wordt geladen…"
+            switch model.state {
+            case .ready:              return "Houd ⌥Space ingedrukt en spreek"
+            case .downloading(let f): return "Model downloaden… \(pct(f)) — eenmalig, even geduld"
+            case .loading:            return "Model voorbereiden… — eenmalig, even geduld"
+            case .notLoaded:          return "Model voorbereiden…"
+            case .failed:             return "⚠︎ Model laden mislukt — herstart Fluister"
+            }
         case .recording:    return "● Opname… (laat ⌥Space los)"
         case .transcribing: return "Transcriberen…"
         case .inserting:    return "Invoegen…"
@@ -80,10 +84,24 @@ struct MenuBarView: View {
 
     private var statusText: String {
         switch permissions.readiness {
-        case .ready:              return "Status: klaar"
+        case .ready:
+            // Permissies zijn rond, maar dicteren kan pas als het model klaar is.
+            // De eerste keer duurt dat (download + compileren) — dat maken we zichtbaar.
+            switch model.state {
+            case .ready:              return "Status: klaar om te dicteren"
+            case .downloading(let f): return "Status: model downloaden \(pct(f)) (eenmalig)"
+            case .loading:            return "Status: model voorbereiden (eenmalig)"
+            case .notLoaded:          return "Status: model voorbereiden"
+            case .failed:             return "Status: model laden mislukt"
+            }
         case .needsMicrophone:    return "Status: microfoon-toegang nodig"
         case .needsAccessibility: return "Status: toegankelijkheid nodig"
         case .blocked:            return "Status: microfoon geweigerd"
         }
+    }
+
+    /// Fractie 0…1 → afgerond percentage, bv. "42%".
+    private func pct(_ f: Double) -> String {
+        "\(Int((max(0, min(1, f)) * 100).rounded()))%"
     }
 }

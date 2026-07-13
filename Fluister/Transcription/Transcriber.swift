@@ -8,7 +8,10 @@ import WhisperKit
 // is pure taal-normalisatie (auto → nil = laat WhisperKit de taal detecteren).
 
 protocol SpeechTranscribing {
-    func prepare() async throws
+    /// Downloadt (eenmalig) en laadt het model. `onDownloadProgress` rapporteert de
+    /// download-fractie (0…1) zodat de UI echte voortgang kan tonen i.p.v. een
+    /// statische "laden"-tekst waar gebruikers op afhaken.
+    func prepare(onDownloadProgress: @escaping @Sendable (Double) -> Void) async throws
     func transcribe(samples: [Float], language: String?) async throws -> String
 }
 
@@ -26,15 +29,21 @@ actor WhisperKitTranscriber: SpeechTranscribing {
         self.model = model
     }
 
-    /// Laadt, downloadt en prewarmt het model — zodat het zware compileer/laadwerk
-    /// hier gebeurt (bij "Model laden") en de eerste transcriptie al snel is.
-    func prepare() async throws {
+    /// Downloadt (eenmalig, mét voortgang) en laadt/prewarmt het model — zodat het
+    /// zware compileer/laadwerk hier gebeurt en de eerste transcriptie al snel is.
+    func prepare(onDownloadProgress: @escaping @Sendable (Double) -> Void) async throws {
         guard pipe == nil else { return }
-        pipe = try await WhisperKit(WhisperKitConfig(model: model, prewarm: true, load: true))
+        // Splits download en laden: de download levert echte voortgang; daarna
+        // laden we uit de lokale map zonder opnieuw te downloaden.
+        let folder = try await WhisperKit.download(variant: model, progressCallback: { progress in
+            onDownloadProgress(progress.fractionCompleted)
+        })
+        pipe = try await WhisperKit(WhisperKitConfig(
+            model: model, modelFolder: folder.path, prewarm: true, load: true, download: false))
     }
 
     func transcribe(samples: [Float], language: String?) async throws -> String {
-        if pipe == nil { try await prepare() }
+        if pipe == nil { try await prepare(onDownloadProgress: { _ in }) }
         guard let pipe else { return "" }
         let options = DecodingOptions(task: .transcribe, language: language)
         let batch = await pipe.transcribe(audioArrays: [samples], decodeOptions: options)

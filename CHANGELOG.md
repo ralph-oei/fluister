@@ -17,3 +17,5 @@ Eerste publieke release.
 - Instelbare taal (Nederlands / Engels), sneltoets en start-bij-inloggen.
 - Klembord-veilige tekst-insertie met beveiliging tegen invoer in wachtwoordvelden.
 - App-icoon en een gestileerde installer-DMG met sleep-naar-Programma's-instructie.
+- Zichtbare voortgang bij de eenmalige model-download (percentage in het menu),
+  zodat de eerste start niet lijkt vast te lopen.

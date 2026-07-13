@@ -9,7 +9,8 @@ import Foundation
 final class ModelManager: ObservableObject {
     enum State: Equatable {
         case notLoaded
-        case loading
+        case downloading(Double)   // eenmalige model-download, fractie 0…1
+        case loading               // gedownload; nu compileren/prewarmen
         case ready
         case failed(String)
     }
@@ -27,13 +28,24 @@ final class ModelManager: ObservableObject {
 
     func load() async {
         switch state {
-        case .loading, .ready: return
+        case .downloading, .loading, .ready: return
         case .notLoaded, .failed: break
         }
-        state = .loading
+        state = .downloading(0)
         let t = makeTranscriber(ModelManager.modelName)
         do {
-            try await t.prepare()
+            try await t.prepare(onDownloadProgress: { [weak self] frac in
+                Task { @MainActor in
+                    guard let self else { return }
+                    // Alleen bijwerken zolang we nog in de download-fase zitten;
+                    // een late callback mag .loading/.ready niet terugzetten.
+                    if frac >= 1.0 {
+                        if case .downloading = self.state { self.state = .loading }
+                    } else if case .downloading = self.state {
+                        self.state = .downloading(frac)
+                    }
+                }
+            })
             transcriber = t
             state = .ready
         } catch {
