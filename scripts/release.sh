@@ -57,13 +57,13 @@ xcrun notarytool submit "$APPZIP" --keychain-profile "$NOTARY_PROFILE" --wait
 xcrun stapler staple "$APP"
 rm -f "$APPZIP"
 
-# --- 4. DMG bouwen uit de gestaplede app (drag-to-Applications) --------------
-echo "▶ DMG bouwen…"
-STAGE="$(mktemp -d)"
-cp -R "$APP" "$STAGE/"
-ln -s /Applications "$STAGE/Applications"
-hdiutil create -volname "Fluister" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
-rm -rf "$STAGE"
+# --- 4. Gestileerde installer-DMG uit de gestaplede app ----------------------
+# App links, Programma's-snelkoppeling rechts, achtergrond met sleep-instructie.
+echo "▶ DMG bouwen (gestileerd, drag-to-Applications)…"
+BG="$(mktemp -u).png"
+swift "$(dirname "$0")/make-dmg-bg.swift" "$BG" >/dev/null
+"$(dirname "$0")/make-dmg.sh" "$APP" "$DMG" "Fluister" "$BG"
+rm -f "$BG"
 codesign --force --sign "$IDENTITY" --timestamp "$DMG"
 
 # --- 5. DMG notariseren + stapelen -------------------------------------------
