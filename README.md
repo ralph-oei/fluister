@@ -32,8 +32,6 @@ je eigen Mac, op de Neural Engine, via [WhisperKit](https://github.com/argmaxinc
 Vereist macOS 14 of nieuwer op Apple Silicon. Bij de eerste start downloadt de app
 eenmalig het spraakmodel (zie [100% lokaal, op 1 ding na](#100-lokaal-op-1-ding-na)).
 
-> De eerste release-DMG volgt binnenkort. Tot die tijd bouw je 'm [zelf](#zelf-bouwen).
-
 ## Waarom deze permissies?
 
 Fluister vraagt om 2 dingen. Allebei nodig, geen van beide eng:
