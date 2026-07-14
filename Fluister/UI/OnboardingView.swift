@@ -97,6 +97,7 @@ struct OnboardingView: View {
                 Text(title).font(.headline)
                 Text(detail)
                     .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(.secondary)
                 if !done { action() }
             }
