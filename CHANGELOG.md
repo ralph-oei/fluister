@@ -3,7 +3,7 @@
 Alle noemenswaardige wijzigingen aan Fluister staan hier. Formaat volgt losjes
 [Keep a Changelog](https://keepachangelog.com/); versies volgen [SemVer](https://semver.org/).
 
-## [0.1.0] — nog niet uitgebracht
+## [0.1.0] — 2026-07-13
 
 Eerste publieke release.
 
