@@ -25,6 +25,7 @@ struct FluisterApp: App {
             )
         } label: {
             MenuBarLabel(
+                app: app,
                 permissions: app.permissions,
                 controller: app.controller,
                 settings: app.settings
@@ -47,7 +48,7 @@ struct FluisterApp: App {
         .windowResizability(.contentSize)
 
         Window("Welkom bij Fluister", id: FluisterWindow.onboarding) {
-            OnboardingView(permissions: app.permissions, settings: app.settings)
+            OnboardingView(permissions: app.permissions, settings: app.settings, model: app.model)
         }
         .windowResizability(.contentSize)
 
@@ -61,6 +62,7 @@ struct FluisterApp: App {
 /// Het menubalk-icoon, dat reageert op status en opname. Opent bij eerste start
 /// (zolang de onboarding niet is afgerond) het welkomstvenster.
 struct MenuBarLabel: View {
+    @ObservedObject var app: AppModel
     @ObservedObject var permissions: PermissionsManager
     @ObservedObject var controller: DictationController
     @ObservedObject var settings: AppSettings
@@ -70,6 +72,12 @@ struct MenuBarLabel: View {
         Image(systemName: iconName)
             .onAppear {
                 guard !settings.hasCompletedOnboarding else { return }
+                NSApp.activate(ignoringOtherApps: true)
+                openWindow(id: FluisterWindow.onboarding)
+            }
+            // ⌥Space terwijl het model nog laadt → haal het voortgang-venster naar
+            // voren, zodat de eerste-start-download zichtbaar wordt.
+            .onChange(of: app.modelHintPulse) { _, _ in
                 NSApp.activate(ignoringOtherApps: true)
                 openWindow(id: FluisterWindow.onboarding)
             }

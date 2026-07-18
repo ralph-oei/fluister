@@ -17,6 +17,11 @@ final class AppModel: ObservableObject {
     let inserter = TextInserter()
     let controller: DictationController
 
+    /// Tikt op bij ⌥Space terwijl het model nog niet klaar is. De UI gebruikt dit om
+    /// het onboarding/voortgang-venster naar voren te halen, zodat de eerste-start-
+    /// download zichtbaar wordt i.p.v. dat ⌥Space "kapot" lijkt.
+    @Published private(set) var modelHintPulse = 0
+
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -30,7 +35,13 @@ final class AppModel: ObservableObject {
 
         // Sneltoets → controller (aanroepen komen al op de main-thread binnen).
         hotkey.onStart = { [weak self] in
-            MainActor.assumeIsolated { self?.controller.startDictation() }
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.controller.startDictation()
+                // Model nog niet klaar (eerste-start download)? Laat de UI het
+                // voortgang-venster tonen — anders lijkt ⌥Space niks te doen.
+                if self.model.state != .ready { self.modelHintPulse += 1 }
+            }
         }
         hotkey.onStop = { [weak self] in
             MainActor.assumeIsolated { self?.controller.stopDictation() }

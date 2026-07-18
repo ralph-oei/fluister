@@ -38,7 +38,10 @@ final class DictationControllerTests: XCTestCase {
 
         c.startDictation()
 
-        if case .blocked = c.phase {} else { XCTFail("verwacht .blocked, kreeg \(c.phase)") }
+        if case .blocked(let m) = c.phase {
+            XCTAssertTrue(m.contains("voorbereid"),
+                          "blocked-bericht moet uitleggen dat het model nog laadt, kreeg: \(m)")
+        } else { XCTFail("verwacht .blocked, kreeg \(c.phase)") }
         XCTAssertFalse(rec.started, "opname mag niet starten zonder geladen model")
     }
 

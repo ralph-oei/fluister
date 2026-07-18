@@ -36,7 +36,7 @@ final class DictationController: ObservableObject {
     func startDictation() {
         guard phase == .idle else { return }
         guard model.state == .ready, model.transcriber != nil else {
-            setBlocked("model nog niet geladen")
+            setBlocked(modelNotReadyHint(model.state))
             return
         }
         do {

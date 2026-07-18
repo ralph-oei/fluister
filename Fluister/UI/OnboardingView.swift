@@ -7,6 +7,7 @@ import SwiftUI
 struct OnboardingView: View {
     @ObservedObject var permissions: PermissionsManager
     @ObservedObject var settings: AppSettings
+    @ObservedObject var model: ModelManager
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -20,17 +21,18 @@ struct OnboardingView: View {
 
             micStep
             accessibilityStep
+            modelStep
 
             Divider()
 
-            if permissions.readiness == .ready {
+            if onboardingReadyToDictate(permissions.readiness, model.state) {
                 Label("Alles staat klaar. Houd ⌥Space ingedrukt en spreek.",
                       systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                 Button("Aan de slag") { finish() }
                     .keyboardShortcut(.defaultAction)
             } else {
-                Text("Zodra beide toestemmingen groen zijn, kun je meteen dicteren.")
+                Text(bottomHint)
                     .font(.callout)
                     .foregroundStyle(.secondary)
                 HStack {
@@ -79,6 +81,57 @@ struct OnboardingView: View {
                 permissions.openAccessibilitySettings()
             }
         }
+    }
+
+    @ViewBuilder
+    private var modelStep: some View {
+        stepRow(
+            done: modelStepDone(model.state),
+            index: "3",
+            title: "Taalmodel",
+            detail: "Wordt bij de eerste start eenmalig gedownload (honderden MB) en draait daarna volledig lokaal, ook offline."
+        ) {
+            modelProgress
+        }
+    }
+
+    @ViewBuilder
+    private var modelProgress: some View {
+        switch model.state {
+        case .downloading(let f):
+            VStack(alignment: .leading, spacing: 4) {
+                ProgressView(value: f)
+                    .frame(maxWidth: 280)
+                Text("\(modelPct(f)) gedownload — eenmalig")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        case .loading:
+            HStack(spacing: 8) {
+                ProgressView().controlSize(.small)
+                Text("Model wordt voorbereid…")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        case .notLoaded:
+            Text("Start zodra de microfoon en toegankelijkheid groen zijn.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        case .failed(let m):
+            Text("Laden mislukt: \(m). Herstart Fluister.")
+                .font(.caption)
+                .foregroundStyle(.red)
+        case .ready:
+            EmptyView()
+        }
+    }
+
+    /// Contextuele regel onderaan zolang dicteren nog niet kan.
+    private var bottomHint: String {
+        if permissions.readiness == .ready && !modelStepDone(model.state) {
+            return "Nog heel even: het taalmodel wordt gedownload. Je kunt dit venster open laten; dicteren kan zodra stap 3 groen is."
+        }
+        return "Zodra alle stappen groen zijn, kun je meteen dicteren."
     }
 
     @ViewBuilder

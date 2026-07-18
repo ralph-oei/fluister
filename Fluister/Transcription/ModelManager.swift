@@ -53,3 +53,33 @@ final class ModelManager: ObservableObject {
         }
     }
 }
+
+// MARK: - Pure helpers (testbaar, gedeeld door onboarding, menu en ⌥Space-hint)
+
+/// Of het taalmodel klaar is om mee te dicteren (onboarding-stap 3 groen).
+func modelStepDone(_ state: ModelManager.State) -> Bool {
+    state == .ready
+}
+
+/// Of dicteren nú kan: permissies rond én model geladen. Voorkomt dat de onboarding
+/// "alles staat klaar" toont terwijl het model nog aan het downloaden is.
+func onboardingReadyToDictate(_ readiness: DictationReadiness, _ modelState: ModelManager.State) -> Bool {
+    readiness == .ready && modelState == .ready
+}
+
+/// Korte uitleg waarom ⌥Space (nog) niks doet — met de download-% als die er is.
+/// De eerste keer downloadt het model honderden MB; zonder deze hint lijkt de app kapot.
+func modelNotReadyHint(_ state: ModelManager.State) -> String {
+    switch state {
+    case .downloading(let f): return "Model wordt nog gedownload — \(modelPct(f)) (eenmalig)"
+    case .loading:            return "Model wordt voorbereid… (eenmalig)"
+    case .notLoaded:          return "Model wordt voorbereid…"
+    case .ready:              return "Klaar om te dicteren"
+    case .failed:             return "Model laden mislukt — herstart Fluister"
+    }
+}
+
+/// Fractie 0…1 → afgerond percentage, bv. "42%".
+func modelPct(_ f: Double) -> String {
+    "\(Int((max(0, min(1, f)) * 100).rounded()))%"
+}
