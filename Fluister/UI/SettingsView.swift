@@ -66,7 +66,10 @@ struct SettingsView: View {
                         }
                     }
                 }
-                .frame(maxHeight: 140)
+                // Expliciete hoogte, geen maxHeight: een ScrollView heeft geen eigen hoogte,
+                // dus in een VStack die zich naar de inhoud voegt zakt 'ie in tot 0 en zijn de
+                // regels onzichtbaar aanwezig (gevonden 31-07).
+                .frame(height: min(CGFloat(dictionary.entries.count) * 26 + 6, 160))
             }
 
             HStack {
