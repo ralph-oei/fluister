@@ -9,6 +9,8 @@ import KeyboardShortcuts
 @MainActor
 final class AppModel: ObservableObject {
     let settings = AppSettings()
+    /// Persoonlijke woordenlijst; voedt de dicteer-keten en de correctie-flow.
+    let dictionary = DictionaryStore()
     let launchAtLogin = LaunchAtLoginController()
     let permissions = PermissionsManager()
     let hotkey = HotkeyManager()
@@ -29,6 +31,7 @@ final class AppModel: ObservableObject {
         model = ModelManager()
         controller = DictationController(recorder: recorder, model: model, inserter: inserter)
         controller.language = settings.language
+        controller.dictionaryPairs = dictionary.pairs
 
         // Opgeslagen sneltoets → onze tap (default ⌥Space als er niets/ongeldig is).
         applyHotkey(KeyboardShortcuts.getShortcut(for: .pushToTalk))
@@ -54,6 +57,15 @@ final class AppModel: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] lang in
                 self?.controller.language = lang
+            }
+            .store(in: &cancellables)
+
+        // Woordenlijst wijzigt (toevoegen/verwijderen/leren) → keten meteen bij.
+        dictionary.$entries
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.controller.dictionaryPairs = self?.dictionary.pairs ?? []
             }
             .store(in: &cancellables)
 

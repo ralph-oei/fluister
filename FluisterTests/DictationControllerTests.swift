@@ -121,4 +121,31 @@ final class DictationControllerTests: XCTestCase {
         XCTAssertFalse(rec.stopped)
         XCTAssertEqual(c.phase, .idle)
     }
+
+    // MARK: - Personal dictionary (task 4)
+
+    func testFinishPastWoordenlijstToe() async {
+        let rec = FakeRecorder()
+        let model = makeReadyModel(text: "ik gebruik naslak")
+        await model.load()
+        let inserter = FakeInserter()
+        let c = DictationController(recorder: rec, model: model, inserter: inserter)
+        c.dictionaryPairs = [("naslak", "Naslag")]
+
+        await c.finish(samples: Array(repeating: Float(0.1), count: 8_000))
+
+        XCTAssertEqual(inserter.inserted, ["ik gebruik Naslag"])
+    }
+
+    func testFinishZonderParenOngewijzigd() async {
+        let rec = FakeRecorder()
+        let model = makeReadyModel(text: "ik gebruik naslak")
+        await model.load()
+        let inserter = FakeInserter()
+        let c = DictationController(recorder: rec, model: model, inserter: inserter)
+
+        await c.finish(samples: Array(repeating: Float(0.1), count: 8_000))
+
+        XCTAssertEqual(inserter.inserted, ["ik gebruik naslak"])
+    }
 }

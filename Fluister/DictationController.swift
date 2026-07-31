@@ -19,6 +19,9 @@ final class DictationController: ObservableObject {
     @Published private(set) var phase: Phase = .idle
     var language: String = "nl"
 
+    /// Persoonlijke woordenlijst (fout→goed). Wordt door AppModel bedraad vanuit DictionaryStore.
+    var dictionaryPairs: [(wrong: String, right: String)] = []
+
     /// Minimale opnameduur (~0,3s) om per ongeluk aantikken te negeren.
     private let minSamples = 4_800
 
@@ -74,8 +77,9 @@ final class DictationController: ObservableObject {
                 phase = .idle
                 return
             }
+            let out = DictionaryFormatter.apply(text, pairs: dictionaryPairs)
             phase = .inserting
-            inserter.insert(text)
+            inserter.insert(out)
             phase = .idle
         } catch {
             setBlocked(error.localizedDescription)
