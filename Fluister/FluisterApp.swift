@@ -62,7 +62,7 @@ struct FluisterApp: App {
 
         Window("Corrigeer laatste dictaat", id: FluisterWindow.correction) {
             CorrectionView(
-                originalText: app.controller.lastInsertedText ?? "",
+                controller: app.controller,
                 onSave: { edited in
                     app.correctLastDictation(edited: edited)
                     dismissWindow(id: FluisterWindow.correction)

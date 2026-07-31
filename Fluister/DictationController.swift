@@ -24,7 +24,9 @@ final class DictationController: ObservableObject {
 
     /// De laatst ingevoegde tekst (ná toepassing van de woordenlijst). Basis voor de
     /// "corrigeer laatste dictaat"-flow; nil tot de eerste invoeging.
-    private(set) var lastInsertedText: String?
+    /// @Published is hier niet optioneel: het correctievenster observeert deze waarde. Zonder
+    /// publicatie kreeg de UI geen seintje en bleef het venster leeg (gevonden 31-07).
+    @Published private(set) var lastInsertedText: String?
 
     /// Minimale opnameduur (~0,3s) om per ongeluk aantikken te negeren.
     private let minSamples = 4_800
