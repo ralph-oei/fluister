@@ -44,6 +44,7 @@ struct FluisterApp: App {
             SettingsView(
                 settings: app.settings,
                 launchAtLogin: app.launchAtLogin,
+                dictionary: app.dictionary,
                 onHotkeyChange: { app.applyHotkey($0) }
             )
         }
