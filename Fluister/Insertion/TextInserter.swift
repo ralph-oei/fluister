@@ -15,6 +15,8 @@ import Carbon.HIToolbox
 /// Naad voor de orkestratie (U7), zodat DictationController met een fake test.
 protocol TextInserting: AnyObject {
     func insert(_ text: String)
+    /// Fix-now: haal de zojuist ingevoegde tekst weg en zet de gecorrigeerde versie neer.
+    func replaceLast(oldText: String, with newText: String)
 }
 
 final class TextInserter: TextInserting {
@@ -43,6 +45,22 @@ final class TextInserter: TextInserting {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.restorePasteboard(saved)
         }
+    }
+
+    /// Fix-now: verwijder de zojuist ingevoegde tekst en plak de gecorrigeerde versie.
+    /// Werkt alleen schoon direct ná een dictaat, want het leunt op de aanname dat de cursor
+    /// nog achter de invoeging staat. Bij secure input kan er niets gestuurd worden; dan zetten
+    /// we de gecorrigeerde tekst op het klembord zodat de gebruiker 'm zelf kan plakken.
+    func replaceLast(oldText: String, with newText: String) {
+        guard oldText != newText else { return }
+        guard !IsSecureEventInputEnabled() else {
+            NSLog("Fluister: secure input actief, correctie naar klembord")
+            setPasteboard(newText)
+            return
+        }
+
+        postBackspaces(count: oldText.count)
+        insert(newText)
     }
 
     // MARK: - Testbare klembord-helpers
@@ -75,6 +93,19 @@ final class TextInserter: TextInserting {
     }
 
     // MARK: - Systeem: ⌘V synthetiseren (niet unit-getest)
+
+    /// Stuurt `count` keer backspace (keycode 51). Zelfde CGEvent-pad als de ⌘V-injectie.
+    private func postBackspaces(count: Int) {
+        guard count > 0 else { return }
+        let source = CGEventSource(stateID: .combinedSessionState)
+        let deleteKey: CGKeyCode = 0x33 // backspace
+        for _ in 0..<count {
+            CGEvent(keyboardEventSource: source, virtualKey: deleteKey, keyDown: true)?
+                .post(tap: .cgAnnotatedSessionEventTap)
+            CGEvent(keyboardEventSource: source, virtualKey: deleteKey, keyDown: false)?
+                .post(tap: .cgAnnotatedSessionEventTap)
+        }
+    }
 
     private func postPasteShortcut() {
         let source = CGEventSource(stateID: .combinedSessionState)

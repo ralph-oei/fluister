@@ -19,7 +19,9 @@ final class FakeRecorder: AudioRecording, @unchecked Sendable {
 
 final class FakeInserter: TextInserting, @unchecked Sendable {
     private(set) var inserted: [String] = []
+    private(set) var replaced: [(old: String, new: String)] = []
     func insert(_ text: String) { inserted.append(text) }
+    func replaceLast(oldText: String, with newText: String) { replaced.append((oldText, newText)) }
 }
 
 @MainActor
@@ -147,5 +149,27 @@ final class DictationControllerTests: XCTestCase {
         await c.finish(samples: Array(repeating: Float(0.1), count: 8_000))
 
         XCTAssertEqual(inserter.inserted, ["ik gebruik naslak"])
+    }
+
+    // MARK: - Laatste dictaat onthouden (task 5)
+
+    func testFinishOnthoudtLaatsteTekst() async {
+        let rec = FakeRecorder()
+        let model = makeReadyModel(text: "ik gebruik naslak")
+        await model.load()
+        let inserter = FakeInserter()
+        let c = DictationController(recorder: rec, model: model, inserter: inserter)
+        c.dictionaryPairs = [("naslak", "Naslag")]
+
+        await c.finish(samples: Array(repeating: Float(0.1), count: 8_000))
+
+        XCTAssertEqual(c.lastInsertedText, "ik gebruik Naslag")
+    }
+
+    func testLaatsteTekstNilVoorEersteDictaat() {
+        let rec = FakeRecorder()
+        let model = makeReadyModel()
+        let c = DictationController(recorder: rec, model: model, inserter: FakeInserter())
+        XCTAssertNil(c.lastInsertedText)
     }
 }

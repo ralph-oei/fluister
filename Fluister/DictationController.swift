@@ -22,6 +22,10 @@ final class DictationController: ObservableObject {
     /// Persoonlijke woordenlijst (fout→goed). Wordt door AppModel bedraad vanuit DictionaryStore.
     var dictionaryPairs: [(wrong: String, right: String)] = []
 
+    /// De laatst ingevoegde tekst (ná toepassing van de woordenlijst). Basis voor de
+    /// "corrigeer laatste dictaat"-flow; nil tot de eerste invoeging.
+    private(set) var lastInsertedText: String?
+
     /// Minimale opnameduur (~0,3s) om per ongeluk aantikken te negeren.
     private let minSamples = 4_800
 
@@ -80,6 +84,7 @@ final class DictationController: ObservableObject {
             let out = DictionaryFormatter.apply(text, pairs: dictionaryPairs)
             phase = .inserting
             inserter.insert(out)
+            lastInsertedText = out
             phase = .idle
         } catch {
             setBlocked(error.localizedDescription)
