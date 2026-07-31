@@ -68,11 +68,15 @@ final class AppModel: ObservableObject {
             .store(in: &cancellables)
 
         // Woordenlijst wijzigt (toevoegen/verwijderen/leren) → keten meteen bij.
+        // LET OP: gebruik de meegeleverde waarde, niet `dictionary.pairs`. @Published
+        // publiceert in willSet, dus de property zelf houdt op dat moment nog de óude
+        // lijst vast — opnieuw uitlezen loopt precies één wijziging achter, waardoor een
+        // net geleerd paar pas na een herstart werkte (gevonden 31-07).
         dictionary.$entries
             .dropFirst()
             .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.controller.dictionaryPairs = self?.dictionary.pairs ?? []
+            .sink { [weak self] entries in
+                self?.controller.dictionaryPairs = entries.map { ($0.wrong, $0.right) }
             }
             .store(in: &cancellables)
 

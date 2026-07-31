@@ -1,4 +1,5 @@
 import XCTest
+import Combine
 @testable import Fluister
 
 @MainActor
@@ -43,5 +44,24 @@ final class DictionaryStoreTests: XCTestCase {
         s.add(wrong: "naslak", right: "Naslag")
         XCTAssertEqual(s.pairs.first?.wrong, "naslak")
         XCTAssertEqual(s.pairs.first?.right, "Naslag")
+    }
+
+    /// Documenteert waarom AppModel de meegeleverde waarde gebruikt en niet de property
+    /// opnieuw uitleest: @Published publiceert in willSet, dus tijdens de sink houdt
+    /// `entries` nog de oude lijst vast. Een abonnee die de property leest loopt achter.
+    func testPublisherLevertNieuweLijstTerwijlPropertyNogOudIs() {
+        let s = DictionaryStore(url: tempURL())
+        var uitPublisher: [DictionaryEntry] = []
+        var uitProperty: [DictionaryEntry] = []
+
+        let c = s.$entries.dropFirst().sink { nieuw in
+            uitPublisher = nieuw
+            uitProperty = s.entries   // bewust: dit is de val
+        }
+        s.add(wrong: "ralf.oei@gmail.com", right: "ralph.oei@gmail.com")
+        c.cancel()
+
+        XCTAssertEqual(uitPublisher.count, 1, "de publisher levert de nieuwe lijst")
+        XCTAssertTrue(uitProperty.isEmpty, "de property loopt achter tijdens de sink")
     }
 }
