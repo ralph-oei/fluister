@@ -26,6 +26,13 @@ final class AppModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    /// Verwerkt een handmatige correctie op het laatste dictaat: leert de fout→goed-paren
+    /// en vervangt de al-ingevoegde tekst (fix-now).
+    func correctLastDictation(edited: String) {
+        guard let old = controller.lastInsertedText else { return }
+        DictionaryCorrection.apply(old: old, edited: edited, store: dictionary, inserter: inserter)
+    }
+
     init() {
         // Small-only: het model heeft geen naam-voorkeur meer (KTD2).
         model = ModelManager()

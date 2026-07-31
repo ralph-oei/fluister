@@ -42,6 +42,12 @@ struct MenuBarView: View {
 
         // Zelfde pad als het over-venster: eerst de app naar voren halen, dán het
         // venster openen. Menu-bar-apps komen anders niet vanzelf naar de voorgrond.
+        Button("Corrigeer laatste dictaat…") {
+            NSApp.activate(ignoringOtherApps: true)
+            openWindow(id: FluisterWindow.correction)
+        }
+        .disabled(controller.lastInsertedText == nil)
+
         Button("Instellingen…") {
             NSApp.activate(ignoringOtherApps: true)
             openWindow(id: FluisterWindow.settings)

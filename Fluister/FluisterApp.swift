@@ -10,11 +10,13 @@ enum FluisterWindow {
     static let onboarding = "onboarding"
     static let about = "about"
     static let settings = "settings"
+    static let correction = "correction"
 }
 
 @main
 struct FluisterApp: App {
     @StateObject private var app = AppModel()
+    @Environment(\.dismissWindow) private var dismissWindow
 
     var body: some Scene {
         MenuBarExtra {
@@ -54,6 +56,18 @@ struct FluisterApp: App {
 
         Window("Over Fluister", id: FluisterWindow.about) {
             AboutView()
+        }
+        .windowResizability(.contentSize)
+
+        Window("Corrigeer laatste dictaat", id: FluisterWindow.correction) {
+            CorrectionView(
+                originalText: app.controller.lastInsertedText ?? "",
+                onSave: { edited in
+                    app.correctLastDictation(edited: edited)
+                    dismissWindow(id: FluisterWindow.correction)
+                },
+                onCancel: { dismissWindow(id: FluisterWindow.correction) }
+            )
         }
         .windowResizability(.contentSize)
     }
