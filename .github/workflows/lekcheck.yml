@@ -57,7 +57,7 @@ env:
   LEKCHECK_ISSUE: ''
   # Op een openbare repository is de issue voor iedereen zichtbaar, en daarmee de lekken in je app. Daarom meldt
   # Lekcheck daar niets, tenzij je dit op ja zet. Gebruik op een openbare repository liever Dependabot alerts.
-  LEKCHECK_OPENBAAR: 'nee'
+  LEKCHECK_OPENBAAR: 'ja'
 
 jobs:
   lekcheck:
